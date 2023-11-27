@@ -66,20 +66,35 @@
       }
     </style>
 
-    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"
+    ></script>
+    <script type="text/javascript">
+      (function () {
+        emailjs.init("w2w9jkqN1h-xovWNz");
+      })();
+    </script>
   </head>
   <body>
     <form>
       <h1>Solicitação de Cadastro de Clientes</h1>
 
       <label for="email">EMAIL</label>
-      <input required type="email" id="email" placeholder="EMAIL" name="email" />
+      <input
+        required
+        type="email"
+        id="email"
+        placeholder="EMAIL"
+        name="email"
+      />
 
       <label for="cnpj">CNPJ</label>
       <input required type="text" id="cnpj" placeholder="CNPJ" name="cnpj" />
 
       <label for="razao_social">RAZÃO SOCIAL</label>
-      <input required
+      <input
+        required
         type="text"
         id="razao_social"
         placeholder="Razão Social"
@@ -87,7 +102,8 @@
       />
 
       <label for="inscricao_estadual">INSCRIÇÃO ESTADUAL</label>
-      <input required
+      <input
+        required
         type="text"
         id="inscricao_estadual"
         placeholder="Inscrição estadual"
@@ -95,44 +111,80 @@
       />
 
       <label for="telefone">TELEFONE</label>
-      <input required type="text" id="telefone" placeholder="Telefone" name="telefone" />
+      <input
+        required
+        type="text"
+        id="telefone"
+        placeholder="Telefone"
+        name="telefone"
+      />
 
       <h2 for="paga_frete">Cliente paga frete?</h2>
 
       <div>
-        <input required type="radio" id="paga_frete" name="paga_frete" value="Sim" />
+        <input
+          required
+          type="radio"
+          id="paga_frete"
+          name="paga_frete"
+          value="Sim"
+        />
         <label for="paga_frete">Sim</label>
 
-        <input required type="radio" id="nao_paga_frete" name="paga_frete" value="Não" />
+        <input
+          required
+          type="radio"
+          id="nao_paga_frete"
+          name="paga_frete"
+          value="Não"
+        />
         <label for="nao_paga_frete">Não</label>
       </div>
 
       <input required type="hidden" name="_captcha" value="false" />
 
-      <button type="button">Enviar</button>
+      <button type="submit">Enviar</button>
     </form>
   </body>
 
   <script>
     const submit = document.querySelector("button");
+    const form = document.querySelector("form");
 
-    submit.addEventListener("click", () => {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault()
+
       const form = document.querySelector("form");
-      const emailFrom = form.email.value;
-      Email.send({
-        SecureToken: "705378a2-fc6e-44c0-ba0c-0d57222902b2",
 
-        To: "suporte@nulogistica.com.br",
-        From: "desenvolvimento@nulogistica.com.br",
-        Subject: "Cadastro de CLiente",
-        Body: ` <p>EMAIL: ${form.email.value}</p>
-                <p>CNPJ: ${form.cnpj.value}</p> 
-                <p>RAZÃO SOCIAL: ${form.razao_social.value}</p>
-                <p>IE: ${form.inscricao_estadual.value}</p>
-                <p>Telefone: ${form.telefone.value}</p>
-                <p>Paga Frete?: ${form.paga_frete.value}</p>
-        `,
-      }).then((message) => alert(message));
+      let params = {
+        cnpj: form.cnpj.value, 
+        razao_social: form.razao_social.value, 
+        ie: form.inscricao_estadual.value, 
+        paga_frete: form.paga_frete.value, 
+        vendedor: 'nao se aplica', 
+        email: form.email.value,
+      }
+
+      emailjs.send("service_oab9d72", "template_vy5541s", params).then(function(res){
+        alert('Solicitação enviada com sucesso.')
+      }, function(error){
+        alert("Ocorreu um erro, tente novamente mais tarde!")
+      })
+
+      // emailjs.send("service_oab9d72", "service_oab9d72",{
+      //   SecureToken: "705378a2-fc6e-44c0-ba0c-0d57222902b2",
+
+      //   To: "suporte@nulogistica.com.br",
+      //   From: "desenvolvimento@nulogistica.com.br",
+      //   Subject: "Cadastro de CLiente",
+      //   Body: ` <p>EMAIL: ${form.email.value}</p>
+      //           <p>CNPJ: ${form.cnpj.value}</p> 
+      //           <p>RAZÃO SOCIAL: ${form.razao_social.value}</p>
+      //           <p>IE: ${form.inscricao_estadual.value}</p>
+      //           <p>Telefone: ${form.telefone.value}</p>
+      //           <p>Paga Frete?: ${form.paga_frete.value}</p>
+      //   `,
+      // }).then((message) => alert(message));
     });
   </script>
 </html>
