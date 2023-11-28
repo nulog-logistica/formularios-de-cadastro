@@ -30,7 +30,7 @@
       form {
         display: flex;
         flex-direction: column;
-        width: 500px;
+        width: 600px;
 
         background-color: #353535;
         color: white;
@@ -64,6 +64,11 @@
         height: 35px;
         margin-top: 20px;
       }
+
+      #container-vendedor {
+        display: none;
+        align-items: start;
+      }
     </style>
 
     <script
@@ -80,7 +85,7 @@
     <form>
       <h1>Solicitação de Cadastro de Clientes</h1>
 
-      <label for="email">EMAIL</label>
+      <label for="email">EMAIL SOLICITANTE</label>
       <input
         required
         type="email"
@@ -104,7 +109,7 @@
       <label for="inscricao_estadual">INSCRIÇÃO ESTADUAL</label>
       <input
         required
-        type="text"
+        type="number"
         id="inscricao_estadual"
         placeholder="Inscrição estadual"
         name="inscricao_estadual"
@@ -141,7 +146,22 @@
         <label for="nao_paga_frete">Não</label>
       </div>
 
-      <input required type="hidden" name="_captcha" value="false" />
+      <div id="container-vendedor">
+        <label for="vendedor">NOME VENDEDOR</label>
+        <input
+          type="text"
+          id="nome_vendedor"
+          name="nome_vendedor"
+          placeholder="Nome do Vendedor"
+        />
+        <label for="vendedor">TELEFONE VENDEDOR</label>
+        <input
+          type="text"
+          id="telefone_vendedor"
+          name="telefone_vendedor"
+          placeholder="Telefone do Vendedor"
+        />
+      </div>
 
       <button type="submit">Enviar</button>
     </form>
@@ -150,26 +170,85 @@
   <script>
     const submit = document.querySelector("button");
     const form = document.querySelector("form");
+    const cnpj = document.querySelector("#cnpj");
+
+    const pagaFreteRadio = document.querySelectorAll('input[type="radio"]');
+
+    pagaFreteRadio.forEach((input) => {
+      input.addEventListener("change", () => {
+        const containerVendedor = document.querySelector("#container-vendedor");
+        if (input.value === "Sim") {
+          containerVendedor.style.display = "flex";
+        } else {
+          const inputsVendedor = document.querySelectorAll(
+            "#container-vendedor input"
+          );
+
+          inputsVendedor.forEach((input) => {
+            input.value = "";
+          });
+          containerVendedor.style.display = "none";
+        }
+      });
+    });
+
+    cnpj.addEventListener("input", () => formatarCNPJ(cnpj));
+
+    function formatarCNPJ(input) {
+      // Remove caracteres não numéricos
+      var cnpj = input.value.replace(/\D/g, "");
+
+      // Adiciona a máscara
+      if (cnpj.length <= 14) {
+        cnpj = cnpj.replace(
+          /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+          "$1.$2.$3/$4-$5"
+        );
+      } else {
+        // Se ultrapassar 14 dígitos, limita o tamanho para 18
+        cnpj = cnpj.substring(0, 18);
+      }
+
+      // Atualiza o valor do campo
+      input.value = cnpj;
+    }
 
     form.addEventListener("submit", (e) => {
-      e.preventDefault()
+      e.preventDefault();
+
+      submit.disabled = true;
+      submit.innerText = "Enviando...";
+      document.body.style.cursor = "wait";
 
       const form = document.querySelector("form");
 
       let params = {
-        cnpj: form.cnpj.value, 
-        razao_social: form.razao_social.value, 
-        ie: form.inscricao_estadual.value, 
-        paga_frete: form.paga_frete.value, 
-        vendedor: 'nao se aplica', 
+        cnpj: form.cnpj.value,
+        razao_social: form.razao_social.value,
+        ie: form.inscricao_estadual.value,
+        paga_frete: form.paga_frete.value,
+        telefone: form.telefone.value,
+        vendedorNome:
+          form.nome_vendedor.value !== ""
+            ? form.nome_vendedor.value
+            : "Não se aplica",
+        vendedorTelefone:
+          form.telefone_vendedor.value !== ""
+            ? form.telefone_vendedor.value
+            : "Não se aplica",
         email: form.email.value,
-      }
+      };
 
-      emailjs.send("service_oab9d72", "template_vy5541s", params).then(function(res){
-        alert('Solicitação enviada com sucesso.')
-      }, function(error){
-        alert("Ocorreu um erro, tente novamente mais tarde!")
-      })
+      emailjs.send("service_oab9d72", "template_vy5541s", params).then(
+        function (res) {
+          document.body.style.cursor = "unset";
+          alert("Solicitação enviada com sucesso.");
+          window.location.reload();
+        },
+        function (error) {
+          alert("Ocorreu um erro, tente novamente mais tarde!");
+        }
+      );
 
       // emailjs.send("service_oab9d72", "service_oab9d72",{
       //   SecureToken: "705378a2-fc6e-44c0-ba0c-0d57222902b2",
@@ -178,7 +257,7 @@
       //   From: "desenvolvimento@nulogistica.com.br",
       //   Subject: "Cadastro de CLiente",
       //   Body: ` <p>EMAIL: ${form.email.value}</p>
-      //           <p>CNPJ: ${form.cnpj.value}</p> 
+      //           <p>CNPJ: ${form.cnpj.value}</p>
       //           <p>RAZÃO SOCIAL: ${form.razao_social.value}</p>
       //           <p>IE: ${form.inscricao_estadual.value}</p>
       //           <p>Telefone: ${form.telefone.value}</p>
